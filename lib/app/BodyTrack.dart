@@ -42,14 +42,22 @@ class _BodyTrackState extends State<BodyTrack> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.of(context).pushNamed('/new_track');
-          if (result == true) {
-            _loadData();
+      floatingActionButton: BlocBuilder<WorkoutsBloc, WorkoutsState>(
+        builder: (context, state) {
+          if (state is WorkoutsLoaded && state.workouts.isNotEmpty) {
+            return FloatingActionButton(
+              onPressed: () async {
+                final result =
+                    await Navigator.of(context).pushNamed('/new_track');
+                if (result == true) {
+                  _loadData();
+                }
+              },
+              child: const Icon(Icons.add),
+            );
           }
+          return const SizedBox.shrink();
         },
-        child: const Icon(Icons.add),
       ),
     );
   }
