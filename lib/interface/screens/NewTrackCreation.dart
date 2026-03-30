@@ -1,7 +1,9 @@
+// lib/interface/screens/NewTrackCreation.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/workout_creation/workout_creation_bloc.dart';
 import '../widgets/WeekdayPickerWidget.dart';
+import '../../core/theme/main-app-theme.dart';
 import 'AppBar.dart';
 
 class NewTrackCreation extends StatefulWidget {
@@ -45,7 +47,14 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
         listener: (context, state) {
           if (state is WorkoutCreationError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                ),
+              ),
             );
           }
         },
@@ -61,8 +70,10 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
   }
 
   Widget _buildForm(WorkoutCreationInProgress state) {
+    final theme = Theme.of(context);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,49 +81,53 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
           TextField(
             controller: _nameController,
             maxLength: 50,
-            decoration: const InputDecoration(
-              labelText: "Название тренировки",
+            decoration: InputDecoration(
+              labelText: "Название тренировки *",
               hintText: "Например: Утренняя зарядка",
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              ),
+              counterStyle: theme.textTheme.labelSmall,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
 
           // Дни недели
-          const Text(
+          Text(
             "Дни тренировки",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           const WeekdayPicker(),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
 
           // Длительность
-          const Text(
+          Text(
             "Длительность тренировки",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
             ),
             child: Row(
               children: [
-                const Icon(Icons.timer, color: Colors.deepPurple),
-                const SizedBox(width: 16),
+                Icon(
+                  Icons.timer,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     '$_duration минут',
-                    style: const TextStyle(fontSize: 16),
+                    style: theme.textTheme.bodyLarge,
                   ),
                 ),
                 IconButton(
@@ -127,6 +142,7 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
                           );
                     }
                   },
+                  color: theme.colorScheme.primary,
                 ),
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -140,49 +156,62 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
                           );
                     }
                   },
+                  color: theme.colorScheme.primary,
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // Информация о количестве упражнений
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.fitness_center,
-                  color: Colors.deepPurple,
+          InkWell(
+            onTap: () => _nextStep(state),
+            borderRadius: BorderRadius.circular(AppBorderRadius.md),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.1),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Упражнения',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Добавлено: ${state.template.exercises.length}',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.fitness_center,
+                    color: theme.colorScheme.primary,
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: Colors.grey),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Упражнения',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Добавлено: ${state.template.exercises.length}',
+                          style: theme.textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // Кнопка "Далее"
           SizedBox(
@@ -190,9 +219,12 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
             height: 50,
             child: ElevatedButton(
               onPressed: () => _nextStep(state),
-              child: const Text(
+              child: Text(
                 'Далее →',
-                style: TextStyle(fontSize: 16),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -204,18 +236,32 @@ class _NewTrackCreationState extends State<NewTrackCreation> {
   void _nextStep(WorkoutCreationInProgress state) {
     if (state.template.name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите название тренировки')),
-      );
-      return;
-    }
-    if (state.template.days.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Выберите дни тренировки')),
+        SnackBar(
+          content: const Text('Введите название тренировки'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppBorderRadius.md),
+          ),
+        ),
       );
       return;
     }
 
-    // Переходим к странице упражнений
+    if (state.template.days.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Выберите дни тренировки'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppBorderRadius.md),
+          ),
+        ),
+      );
+      return;
+    }
+
     Navigator.pushNamed(context, '/exercises_creation');
   }
 }

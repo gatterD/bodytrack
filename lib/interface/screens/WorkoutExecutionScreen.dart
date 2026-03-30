@@ -1,26 +1,42 @@
+// lib/interface/screens/WorkoutExecutionScreen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/workout_session/workout_session_bloc.dart';
 import '../../data/models/exercise.dart';
 import '../../data/models/workout_session.dart';
+import '../../core/theme/main-app-theme.dart';
+import 'AppBar.dart';
 
 class WorkoutExecutionScreen extends StatelessWidget {
-  const WorkoutExecutionScreen({Key? key}) : super(key: key);
+  const WorkoutExecutionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<WorkoutSessionBloc, WorkoutSessionState>(
+      appBar: BTAppBar(
+        title: '',
+        showBackButton: true,
+        centerTitle: false,
+        customTitle: BlocBuilder<WorkoutSessionBloc, WorkoutSessionState>(
           builder: (context, state) {
             if (state is WorkoutSessionInProgress) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(state.session.workoutName),
+                  Text(
+                    state.session.workoutName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
                   Text(
                     _formatDate(state.session.date),
-                    style: const TextStyle(fontSize: 12),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               );
@@ -35,13 +51,23 @@ class WorkoutExecutionScreen extends StatelessWidget {
                 final completedCount =
                     state.session.exercises.where((e) => e.isCompleted).length;
                 final totalCount = state.session.exercises.length;
-                return Padding(
-                  padding: const EdgeInsets.all(16),
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  ),
                   child: Center(
                     child: Text(
                       '$completedCount/$totalCount',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 );
@@ -55,17 +81,28 @@ class WorkoutExecutionScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is WorkoutSessionCompleted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Поздравляем! Тренировка завершена! 🎉'),
+              SnackBar(
+                content: const Text('Поздравляем! Тренировка завершена! 🎉'),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 3),
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                ),
               ),
             );
             Navigator.pop(context, true);
           }
           if (state is WorkoutSessionError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                ),
+              ),
             );
           }
         },
@@ -76,7 +113,23 @@ class WorkoutExecutionScreen extends StatelessWidget {
           if (state is WorkoutSessionLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          return const Center(child: Text('Ошибка загрузки'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Ошибка загрузки',
+                  style: theme.textTheme.bodyLarge,
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -87,7 +140,7 @@ class WorkoutExecutionScreen extends StatelessWidget {
       children: [
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: session.exercises.length,
             itemBuilder: (context, index) {
               final exercise = session.exercises[index];
@@ -105,101 +158,90 @@ class WorkoutExecutionScreen extends StatelessWidget {
     ExerciseSession exercise,
     WorkoutSession session,
   ) {
+    final theme = Theme.of(context);
     final isCompleted = exercise.isCompleted;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isCompleted ? Colors.green.shade50 : Colors.white,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      color: isCompleted ? Colors.green.shade50 : theme.cardTheme.color,
       child: InkWell(
         onTap: isCompleted
             ? null
             : () => _showExerciseDialog(context, exercise, session),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: isCompleted
-                          ? Colors.green.shade100
-                          : Colors.deepPurple.shade50,
-                      borderRadius: BorderRadius.circular(25),
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? Colors.green.shade100
+                      : theme.colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Icon(
+                  exercise.type == ExerciseType.running
+                      ? Icons.directions_run
+                      : Icons.fitness_center,
+                  color: isCompleted ? Colors.green : theme.colorScheme.primary,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      exercise.name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        decoration:
+                            isCompleted ? TextDecoration.lineThrough : null,
+                        color: isCompleted
+                            ? Colors.green.shade700
+                            : Colors.black87,
+                      ),
                     ),
-                    child: Icon(
-                      exercise.type == ExerciseType.running
-                          ? Icons.directions_run
-                          : Icons.fitness_center,
-                      color: isCompleted ? Colors.green : Colors.deepPurple,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          exercise.name,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            decoration:
-                                isCompleted ? TextDecoration.lineThrough : null,
-                            color: isCompleted
-                                ? Colors.green.shade700
-                                : Colors.black,
+                    if (exercise.description != null &&
+                        exercise.description!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: Text(
+                          exercise.description!,
+                          style: theme.textTheme.labelMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    if (isCompleted && exercise.result != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: Text(
+                          _getResultText(exercise),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.green.shade700,
                           ),
                         ),
-                        // 👈 Отображаем описание, если есть
-                        if (exercise.description != null &&
-                            exercise.description!.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              exercise.description!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        if (isCompleted && exercise.result != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              _getResultText(exercise),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.green.shade600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (isCompleted)
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green.shade400,
-                      size: 28,
-                    )
-                  else
-                    Icon(
-                      Icons.play_circle_outline,
-                      color: Colors.deepPurple,
-                      size: 28,
-                    ),
-                ],
+                      ),
+                  ],
+                ),
               ),
+              if (isCompleted)
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.green.shade400,
+                  size: 28,
+                )
+              else
+                Icon(
+                  Icons.play_circle_outline,
+                  color: theme.colorScheme.primary,
+                  size: 28,
+                ),
             ],
           ),
         ),
@@ -208,12 +250,13 @@ class WorkoutExecutionScreen extends StatelessWidget {
   }
 
   Widget _buildFinishButton(BuildContext context, WorkoutSession session) {
+    final theme = Theme.of(context);
     final allCompleted = session.exercises.every((e) => e.isCompleted);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -227,17 +270,21 @@ class WorkoutExecutionScreen extends StatelessWidget {
         height: 50,
         child: ElevatedButton(
           onPressed: allCompleted
-              ? () {
-                  context.read<WorkoutSessionBloc>().add(FinishWorkout());
-                }
+              ? () => context.read<WorkoutSessionBloc>().add(FinishWorkout())
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: allCompleted ? Colors.green : Colors.grey,
             foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+            ),
           ),
-          child: const Text(
+          child: Text(
             'Завершить тренировку',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -249,6 +296,8 @@ class WorkoutExecutionScreen extends StatelessWidget {
     ExerciseSession exercise,
     WorkoutSession session,
   ) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -257,20 +306,24 @@ class WorkoutExecutionScreen extends StatelessWidget {
           Map<String, dynamic> result = {};
 
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+            ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(exercise.name),
+                Text(
+                  exercise.name,
+                  style: theme.textTheme.titleLarge,
+                ),
                 if (exercise.description != null &&
                     exercise.description!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
                     child: Text(
                       exercise.description!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ),
@@ -282,9 +335,11 @@ class WorkoutExecutionScreen extends StatelessWidget {
                 if (exercise.type == ExerciseType.running) ...[
                   TextField(
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Дистанция (км)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                      ),
                       hintText: 'Введите пройденную дистанцию',
                     ),
                     onChanged: (value) {
@@ -294,21 +349,25 @@ class WorkoutExecutionScreen extends StatelessWidget {
                 ] else ...[
                   TextField(
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Выполнено подходов',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                      ),
                       hintText: 'Сколько подходов сделали?',
                     ),
                     onChanged: (value) {
                       result['completedSets'] = int.tryParse(value);
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   TextField(
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Максимальный вес (кг)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                      ),
                       hintText: 'Введите использованный вес',
                     ),
                     onChanged: (value) {
@@ -316,12 +375,14 @@ class WorkoutExecutionScreen extends StatelessWidget {
                     },
                   ),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   maxLines: 3,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Заметки',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                    ),
                     hintText: 'Дополнительные заметки о выполнении',
                   ),
                   onChanged: (value) {

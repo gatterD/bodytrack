@@ -1,16 +1,17 @@
+// lib/interface/widgets/ExerciseCreationDialog.dart
 import 'package:flutter/material.dart';
-
 import '../../data/models/exercise.dart';
+import '../../core/theme/main-app-theme.dart';
 
 class ExerciseCreationDialog extends StatefulWidget {
   final Exercise? existingExercise;
   final Function(Exercise) onSave;
 
   const ExerciseCreationDialog({
-    Key? key,
+    super.key,
     this.existingExercise,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _ExerciseCreationDialogState createState() => _ExerciseCreationDialogState();
@@ -65,9 +66,18 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+      ),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        constraints: BoxConstraints(
+          maxWidth: 500,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -77,40 +87,47 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
                 widget.existingExercise == null
                     ? 'Добавить упражнение'
                     : 'Редактировать упражнение',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: theme.textTheme.titleLarge,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.md),
 
               // Название упражнения
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                maxLength: 50,
+                decoration: InputDecoration(
                   labelText: 'Название упражнения *',
-                  border: OutlineInputBorder(),
+                  hintText: 'Например: Приседания со штангой',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  ),
+                  counterStyle: theme.textTheme.labelSmall,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // Описание
               TextField(
                 controller: _descriptionController,
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Описание',
-                  border: OutlineInputBorder(),
+                  hintText: 'Техника выполнения, советы и т.д.',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // Тип упражнения
-              const Text(
+              Text(
                 'Тип упражнения',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               SegmentedButton<ExerciseType>(
                 segments: const [
                   ButtonSegment(
@@ -130,74 +147,120 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
                     _exerciseType = newSelection.first;
                   });
                 },
+                // 👈 Правильное использование style
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return theme.colorScheme.primary;
+                    }
+                    return Colors.grey.shade100;
+                  }),
+                  foregroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Colors.white;
+                    }
+                    return Colors.black87;
+                  }),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // Поля в зависимости от типа
               if (_exerciseType == ExerciseType.running) ...[
                 TextField(
                   controller: _distanceController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Дистанция (км) *',
-                    border: OutlineInputBorder(),
+                    hintText: 'Введите дистанцию в километрах',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                    ),
                     suffixText: 'км',
+                    suffixStyle: theme.textTheme.labelSmall,
                   ),
                 ),
               ] else ...[
-                // Подходы
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: _setsController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Количество подходов *',
-                          border: OutlineInputBorder(),
+                          hintText: 'Например: 3',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.md),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: TextField(
                         controller: _repsController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Повторений *',
-                          border: OutlineInputBorder(),
+                          hintText: 'Например: 10',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.md),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 TextField(
                   controller: _weightController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Вес (кг)',
-                    border: OutlineInputBorder(),
+                    hintText: 'Необязательно',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                    ),
                     suffixText: 'кг',
+                    suffixStyle: theme.textTheme.labelSmall,
                   ),
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // Кнопки
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
+                    child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.md),
+                        ),
+                      ),
                       child: const Text('Отмена'),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _saveExercise,
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.md),
+                        ),
+                      ),
                       child: const Text('Сохранить'),
                     ),
                   ),
@@ -221,8 +284,8 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
 
     if (_exerciseType == ExerciseType.running) {
       final distance = double.tryParse(_distanceController.text);
-      if (distance == null) {
-        _showError('Введите дистанцию');
+      if (distance == null || distance <= 0) {
+        _showError('Введите корректную дистанцию');
         return;
       }
 
@@ -237,8 +300,8 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
       final sets = int.tryParse(_setsController.text);
       final reps = int.tryParse(_repsController.text);
 
-      if (sets == null || reps == null) {
-        _showError('Введите количество подходов и повторений');
+      if (sets == null || sets <= 0 || reps == null || reps <= 0) {
+        _showError('Введите корректное количество подходов и повторений');
         return;
       }
 
@@ -259,7 +322,15 @@ class _ExerciseCreationDialogState extends State<ExerciseCreationDialog> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 }

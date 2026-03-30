@@ -8,6 +8,7 @@ import '../interface/screens/AppBar.dart';
 import '../interface/screens/WorkoutExecutionScreen.dart';
 import '../../bloc/workouts/workouts_bloc.dart';
 import '../../bloc/workout_session/workout_session_bloc.dart';
+import '../../core/theme/main-app-theme.dart';
 
 class BodyTrack extends StatefulWidget {
   const BodyTrack({super.key, required this.title});
@@ -63,11 +64,13 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   Widget _buildCalendar() {
+    final theme = Theme.of(context);
+
     return BlocBuilder<WorkoutSessionBloc, WorkoutSessionState>(
       builder: (context, state) {
         if (state is WorkoutSessionsLoaded) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -80,40 +83,30 @@ class _BodyTrackState extends State<BodyTrack> {
             ),
             child: Column(
               children: [
-                // Заголовок с неделей
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
-                      onPressed: () {
-                        _changeWeek(-1);
-                      },
+                      onPressed: () => _changeWeek(-1),
                     ),
                     Text(
                       _getCurrentWeekText(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleMedium,
                     ),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
-                      onPressed: () {
-                        _changeWeek(1);
-                      },
+                      onPressed: () => _changeWeek(1),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                // Дни недели
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(7, (index) {
                     final dayName = _getDayName(index);
                     final date = _getDateForWeekday(index);
 
-                    // Находим завершенные тренировки за этот день
                     final completedSessions = state.sessions
                         .where((session) =>
                             session.isCompleted &&
@@ -150,44 +143,50 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   Widget _buildDayCell(
-      String dayName, String dayNumber, bool isCompleted, int workoutCount) {
+    String dayName,
+    String dayNumber,
+    bool isCompleted,
+    int workoutCount,
+  ) {
+    final theme = Theme.of(context);
+
     return Container(
-      width: 50,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      width: 45,
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         color: isCompleted ? Colors.green.shade100 : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
       ),
       child: Column(
         children: [
           Text(
             dayName,
-            style: TextStyle(
-              fontSize: 12,
+            style: theme.textTheme.labelMedium?.copyWith(
               color: isCompleted ? Colors.green.shade700 : Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             dayNumber,
-            style: TextStyle(
-              fontSize: 18,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: isCompleted ? Colors.green.shade700 : Colors.black87,
               fontWeight: FontWeight.bold,
-              color: isCompleted ? Colors.green.shade700 : Colors.black,
             ),
           ),
           if (workoutCount > 0)
             Container(
-              margin: const EdgeInsets.only(top: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              margin: const EdgeInsets.only(top: AppSpacing.xs),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
               decoration: BoxDecoration(
                 color: Colors.green.shade200,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppBorderRadius.sm),
               ),
               child: Text(
                 '$workoutCount',
-                style: TextStyle(
-                  fontSize: 10,
+                style: theme.textTheme.labelSmall?.copyWith(
                   color: Colors.green.shade900,
                   fontWeight: FontWeight.bold,
                 ),
@@ -202,9 +201,7 @@ class _BodyTrackState extends State<BodyTrack> {
     return BlocBuilder<WorkoutsBloc, WorkoutsState>(
       builder: (context, state) {
         if (state is WorkoutsLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (state is WorkoutsLoaded) {
@@ -215,7 +212,7 @@ class _BodyTrackState extends State<BodyTrack> {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: workouts.length,
             itemBuilder: (context, index) {
               final workout = workouts[index];
@@ -234,30 +231,30 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.fitness_center,
             size: 64,
-            color: Colors.grey,
+            color: Colors.grey.shade400,
           ),
-          const SizedBox(height: 16),
-          const Text(
+          const SizedBox(height: AppSpacing.md),
+          Text(
             'Нет созданных тренировок',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
           ),
-          const SizedBox(height: 16),
-          const Text(
+          const SizedBox(height: AppSpacing.md),
+          Text(
             'Нажмите на кнопку + чтобы создать',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pushNamed('/new_track');
-            },
+            onPressed: () => Navigator.of(context).pushNamed('/new_track'),
             icon: const Icon(Icons.add),
             label: const Text('Создать тренировку'),
           ),
@@ -267,26 +264,26 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   Widget _buildErrorState(String message) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
             size: 64,
-            color: Colors.red,
+            color: Colors.red.shade400,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Text(
             message,
-            style: const TextStyle(fontSize: 16),
+            style: theme.textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
-            onPressed: () {
-              context.read<WorkoutsBloc>().add(LoadWorkouts());
-            },
+            onPressed: () => context.read<WorkoutsBloc>().add(LoadWorkouts()),
             child: const Text('Повторить'),
           ),
         ],
@@ -295,131 +292,114 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   Widget _buildWorkoutCard(WorkoutTemplate workout) {
+    final theme = Theme.of(context);
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: InkWell(
-        onTap: () {
-          _showWorkoutDetails(workout);
-        },
-        borderRadius: BorderRadius.circular(12),
+        onTap: () => _showWorkoutDetails(workout),
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade50,
-                      borderRadius: BorderRadius.circular(8),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.fitness_center,
-                      color: Colors.deepPurple,
+                      color: theme.colorScheme.primary,
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           workout.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: theme.textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           _getDaysText(workout.days),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                          style: theme.textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade100,
-                      borderRadius: BorderRadius.circular(12),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
                     ),
                     child: Text(
                       '${workout.duration} мин',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.deepPurple.shade700,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
                 children: workout.exercises.take(3).map((exercise) {
                   return Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
                     ),
                     child: Text(
                       _getExerciseShortName(exercise),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
+                      style: theme.textTheme.bodySmall,
                     ),
                   );
                 }).toList(),
               ),
               if (workout.exercises.length > 3)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
                   child: Text(
                     '+ еще ${workout.exercises.length - 3} упражнений',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                    ),
+                    style: theme.textTheme.labelSmall,
                   ),
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton.icon(
-                    onPressed: () {
-                      _startWorkout(workout);
-                    },
+                    onPressed: () => _startWorkout(workout),
                     icon: const Icon(Icons.play_arrow, size: 18),
                     label: const Text('Начать'),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.green,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   TextButton.icon(
-                    onPressed: () {
-                      _deleteWorkout(workout.id);
-                    },
+                    onPressed: () => _deleteWorkout(workout.id),
                     icon: const Icon(Icons.delete, size: 18),
                     label: const Text('Удалить'),
                     style: TextButton.styleFrom(
@@ -436,10 +416,12 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   void _showWorkoutDetails(WorkoutTemplate workout) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(workout.name),
+        title: Text(workout.name, style: theme.textTheme.titleLarge),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -448,46 +430,45 @@ class _BodyTrackState extends State<BodyTrack> {
             children: [
               Text(
                 'Дни: ${_getDaysText(workout.days)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text('Длительность: ${workout.duration} минут'),
-              const SizedBox(height: 16),
-              const Text(
+              const SizedBox(height: AppSpacing.md),
+              Text(
                 'Упражнения:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               ...workout.exercises.map((exercise) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '• ${exercise.name}',
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          style: theme.textTheme.bodyLarge,
                         ),
                         if (exercise.description != null &&
                             exercise.description!.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(left: 16, top: 4),
+                            padding: const EdgeInsets.only(
+                                left: AppSpacing.md, top: AppSpacing.xs),
                             child: Text(
                               exercise.description!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
+                              style: theme.textTheme.bodySmall,
                             ),
                           ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          padding: const EdgeInsets.only(
+                              left: AppSpacing.md, top: AppSpacing.xs),
                           child: Text(
                             _getExerciseDetails(exercise),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
+                            style: theme.textTheme.labelMedium,
                           ),
                         ),
                       ],
@@ -514,6 +495,8 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   void _showCompletedWorkouts(List<WorkoutSession> workouts) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -530,6 +513,7 @@ class _BodyTrackState extends State<BodyTrack> {
                 title: Text(workout.workoutName),
                 subtitle: Text(
                   'Выполнено: ${_formatTime(workout.completedAt!)}',
+                  style: theme.textTheme.labelMedium,
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -550,10 +534,12 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   void _showWorkoutDetailsFromSession(WorkoutSession session) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(session.workoutName),
+        title: Text(session.workoutName, style: theme.textTheme.titleLarge),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -562,16 +548,20 @@ class _BodyTrackState extends State<BodyTrack> {
             children: [
               Text(
                 'Выполнено: ${_formatDateTime(session.completedAt!)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 16),
-              const Text(
+              const SizedBox(height: AppSpacing.md),
+              Text(
                 'Упражнения:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               ...session.exercises.map((exercise) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -586,12 +576,11 @@ class _BodyTrackState extends State<BodyTrack> {
                                   ? Colors.green
                                   : Colors.grey,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 exercise.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
+                                style: theme.textTheme.bodyMedium?.copyWith(
                                   decoration: exercise.isCompleted
                                       ? TextDecoration.lineThrough
                                       : null,
@@ -603,24 +592,21 @@ class _BodyTrackState extends State<BodyTrack> {
                         if (exercise.description != null &&
                             exercise.description!.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(left: 24, top: 4),
+                            padding: const EdgeInsets.only(
+                                left: AppSpacing.lg, top: AppSpacing.xs),
                             child: Text(
                               exercise.description!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
+                              style: theme.textTheme.bodySmall,
                             ),
                           ),
                         if (exercise.result != null)
                           Padding(
-                            padding: const EdgeInsets.only(left: 24, top: 4),
+                            padding: const EdgeInsets.only(
+                                left: AppSpacing.lg, top: AppSpacing.xs),
                             child: Text(
                               _getExerciseResultText(exercise),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.green.shade700,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.green,
                               ),
                             ),
                           ),
@@ -649,12 +635,13 @@ class _BodyTrackState extends State<BodyTrack> {
         builder: (_) => const WorkoutExecutionScreen(),
       ),
     ).then((_) {
-      // Обновляем календарь после завершения тренировки
       context.read<WorkoutSessionBloc>().add(LoadWorkoutSessions());
     });
   }
 
   void _deleteWorkout(String workoutId) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -670,15 +657,15 @@ class _BodyTrackState extends State<BodyTrack> {
               context.read<WorkoutsBloc>().add(DeleteWorkout(workoutId));
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Тренировка удалена'),
+                SnackBar(
+                  content: const Text('Тренировка удалена'),
                   backgroundColor: Colors.orange,
                 ),
               );
             },
-            child: const Text(
+            child: Text(
               'Удалить',
-              style: TextStyle(color: Colors.red),
+              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
             ),
           ),
         ],
@@ -687,8 +674,6 @@ class _BodyTrackState extends State<BodyTrack> {
   }
 
   void _changeWeek(int direction) {
-    // TODO: Реализовать переключение недель
-    // Пока просто обновляем
     context.read<WorkoutSessionBloc>().add(LoadWorkoutSessions());
   }
 
@@ -721,29 +706,28 @@ class _BodyTrackState extends State<BodyTrack> {
   String _getExerciseShortName(Exercise exercise) {
     if (exercise.type == ExerciseType.running) {
       return '🏃 ${exercise.name}';
-    } else {
-      return '💪 ${exercise.name}';
     }
+    return '💪 ${exercise.name}';
   }
 
   String _getExerciseDetails(Exercise exercise) {
     if (exercise.type == ExerciseType.running) {
       return 'Дистанция: ${exercise.distance} км';
-    } else {
-      String details =
-          '${exercise.sets} подходов × ${exercise.repsPerSet} повторений';
-      if (exercise.weight != null && exercise.weight! > 0) {
-        details += ', вес: ${exercise.weight} кг';
-      }
-      return details;
     }
+    String details =
+        '${exercise.sets} подходов × ${exercise.repsPerSet} повторений';
+    if (exercise.weight != null && exercise.weight! > 0) {
+      details += ', вес: ${exercise.weight} кг';
+    }
+    return details;
   }
 
   String _getExerciseResultText(ExerciseSession exercise) {
     if (exercise.type == ExerciseType.running && exercise.result != null) {
       final distance = exercise.result!['distance'];
       return 'Результат: ${distance?.toStringAsFixed(1)} км';
-    } else if (exercise.type == ExerciseType.sets && exercise.result != null) {
+    }
+    if (exercise.type == ExerciseType.sets && exercise.result != null) {
       final sets = exercise.result!['completedSets'];
       final weight = exercise.result!['maxWeight'];
       return 'Результат: $sets подходов${weight != null ? ', вес: $weight кг' : ''}';
